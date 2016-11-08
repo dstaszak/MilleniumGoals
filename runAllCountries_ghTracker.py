@@ -14,6 +14,7 @@ training_data = pd.read_csv("../data/TrainingSet.csv", index_col=0)
 submission_labels = pd.read_csv("../data/SubmissionRows.csv", index_col=0)
 
 
+# The rows/values to be predicted
 prediction_rows = training_data.loc[submission_labels.index]
 
 
