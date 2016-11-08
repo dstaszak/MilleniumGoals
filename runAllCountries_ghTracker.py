@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import collections as col
 import matplotlib.pyplot as plt
-import prettyplotlib as pplt
 
 
 from ghTrackerModel import *
@@ -75,7 +74,7 @@ for num, xx in enumerate(cc2):
         
         # Define the filter, set it rolling
         f = filterGeneric()
-        data, lastDX = f.g_h_filter(data=singleC_valuesSmall, x0=singleC_valuesSmall[indices[0][0]], dx=gain, g=7./10, h=2./3, dt=1.)
+        data, lastDX = f.g_h_filter(data=singleC_valuesSmall, x0=singleC_valuesSmall[indices[0][0]], dx=gain, g=7.4/10, h=2.5/3, dt=1.)
 
 
         # Predict 2008, 2012
@@ -100,6 +99,36 @@ for num, xx in enumerate(cc2):
         elif (len(dataNoNaN) == 1):
             predicted[-1] = predicted[-3]
             predicted[-2] = predicted[-3]
+
+
+        # If the predicted value is >15% larger than the previous version, half it...
+        if (np.absolute(predicted[-1] - dataNoNaN[-1]) > 0.15):
+            print "LESS THAN 15%, -1", predicted[-1], dataNoNaN[-1]
+            if (predicted[-1] - dataNoNaN[-1]) > 0.:                
+                predicted[-1] = dataNoNaN[-1] + np.absolute(predicted[-1] - dataNoNaN[-1]) / 2.0
+                print "Updated predicted:", predicted
+            else:
+                predicted[-1] = dataNoNaN[-1] - np.absolute(predicted[-1] - dataNoNaN[-1]) / 2.0
+                "Updated predicted:", predicted
+        if (np.absolute(predicted[-2] - dataNoNaN[-1]) > 0.15):
+            print "LESS THAN 15%, -2", predicted[-1], dataNoNaN[-1]
+            if (predicted[-2] - dataNoNaN[-1]) > 0.:                
+                predicted[-2] = dataNoNaN[-1] + np.absolute(predicted[-2] - dataNoNaN[-1]) / 2.0
+                "Updated predicted:", predicted
+            else:
+                predicted[-2] = dataNoNaN[-1] - np.absolute(predicted[-2] - dataNoNaN[-1]) / 2.0
+                "Updated predicted:", predicted
+
+
+        # Push any that may be >1.0 or <0.0 back into the fold!
+        if predicted[-1] > 1.0:
+            predicted[-1] = 0.99
+        if predicted[-2] > 1.0:
+            predicted[-2] = 0.99
+        if predicted[-1] < 0.0:
+            predicted[-1] = 0.1
+        if predicted[-2] < 0.0:
+            predicted[-2] = 0.1            
 
                     
 
@@ -141,4 +170,4 @@ for num, xx in enumerate(cc2):
     plt.savefig(saveName, format='png', dpi=300)
     plt.close('all')
 
-write_submission_file(forCSV, "Attempt1_ghfilter.csv")
+write_submission_file(forCSV, "AttemptX_ghfilter.csv")
